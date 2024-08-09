@@ -1,25 +1,41 @@
-
 import { StatusBar } from "expo-status-bar";
-import { StyleSheet, Text, View, Button, TextInput } from "react-native";
+import { StyleSheet, View, FlatList } from "react-native";
 import { useState } from "react";
+import GoalItem from "./components/GoalItem";
+import GoalInput from "./components/GoalInput";
 
 export default function App() {
-  const [enteredGoalText, setEnteredGoalText] = useState('');
-  function getInputHandler(enteredText){
-    setEnteredGoalText(enteredText);
-  };
+  const [courseGoals, setCourseGoals] = useState([]);
 
-  function addGoalHandler(){
- console.log(enteredGoalText);
-  };
+  function addGoalHandler(enteredGoalText) {
+    setCourseGoals((currentCourseGoals) => [
+      ...currentCourseGoals,
+      { text: enteredGoalText, key: Math.random().toString() },
+    ]);
+  }
+
+  function deleteGoalHandler(key) {
+    setCourseGoals((currentCourseGoals) => {
+      return currentCourseGoals.filter((goal) => goal.key !== key);
+    });
+  }
+
   return (
     <View style={styles.appContainer}>
-      <View style={styles.inputContainer}>
-        <TextInput placeholder="your course goal!" style={styles.textInput}  onChangeText={getInputHandler}/>
-        <Button  title="Add Goal" onPress={addGoalHandler} />
-      </View>
-      <View style={styles.goalContainer}> 
-        <Text>List of Goals...</Text>
+      <GoalInput onAddGoal={addGoalHandler} />
+      <View style={styles.goalContainer}>
+        <FlatList
+          data={courseGoals}
+          renderItem={(itemData) => (
+            <GoalItem
+              text={itemData.item.text}
+              onDeleteItem={deleteGoalHandler}
+              id={itemData.item.key} // Changed from item.id to item.key
+            />
+          )}
+          keyExtractor={(item) => item.key} // Ensure keyExtractor matches the key property
+          alwaysBounceVertical={false}
+        />
       </View>
       <StatusBar style="auto" />
     </View>
@@ -30,25 +46,9 @@ const styles = StyleSheet.create({
   appContainer: {
     flex: 1,
     paddingTop: 50,
-    paddingHorizontal: 16
-  },
-  inputContainer: {
-    flex: 1,
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    alignItems: 'center',
-    marginBottom: 24,
-    borderBottomWidth: 1,
-    borderBottomColor: '#cccccc'
-  },
-  textInput: {
-    borderWidth: 1,
-    borderColor: '#cccccc',
-    width: '70%',
-    marginRight: 8,
-    padding: 8,
+    paddingHorizontal: 16,
   },
   goalContainer: {
-    flex : 5
-  }
+    flex: 5,
+  },
 });
